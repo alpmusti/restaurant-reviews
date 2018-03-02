@@ -252,7 +252,6 @@ nav h1 a {
   text-align: center;
   text-transform: uppercase;
 	width: 90%;
-
 }
 
 #restaurant-container, #reviews-container {
@@ -300,6 +299,19 @@ nav h1 a {
   text-align: justify;
 }
 
+#reviews-list li p:first-of-type{
+  font-weight: 700;
+  font-size: 2em;
+}
+
+#reviews-list li p:nth-child(2){
+  color:#818181;
+}
+
+#reviews-list li p:nth-child(3){
+  font-weight: 700;
+}
+
 #restaurant-hours {
   width: 100%;
   overflow-x: auto;
@@ -316,12 +328,17 @@ nav h1 a {
 
 
 @media screen and (max-width:1368px){
+  /* ====================== Restaurant Listing ====================== */
+
   #restaurants-list li {
-    width:calc((100% - 15px) / 4) 
+    width: calc((100% - 15px) / 4) 
   }
 }
 
 @media screen and (min-width:996px) and (max-width:1126px){
+
+  /* ====================== Restaurant Details ====================== */
+
   #restaurants-list li {
     width: 40%;
   }
@@ -332,11 +349,13 @@ nav h1 a {
 }
 
 @media screen and (max-width:996px) {
-  
+  /* ====================== Map ====================== */
   #map{
     height: 100%;
   }
 
+  /* ====================== Restaurant Listing ====================== */
+  #restaurant-name,
   #restaurants-list {
     text-align: center;
   }
@@ -377,7 +396,7 @@ nav h1 a {
 
   #map-container {
     order: 1;
-    height: 75vmax!important;
+    height: 100vw!important;
     position: relative!important;
   }
 
@@ -390,17 +409,4 @@ nav h1 a {
   #reviews-list li {
     width:90%!important;
   }
-}
-
-#reviews-list li p:first-of-type{
-  font-weight: 700;
-  font-size: 2em;
-}
-
-#reviews-list li p:nth-child(2){
-  color:#818181;
-}
-
-#reviews-list li p:nth-child(3){
-  font-weight: 700;
 }
