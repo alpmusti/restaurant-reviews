@@ -1,6 +1,6 @@
 let restaurant;
 var map;
-
+var cacheName = 'restaurant-reviews-v1';
 /**
  * Initialize Google map, called from HTML.
  */
@@ -33,7 +33,7 @@ fetchRestaurantFromURL = (callback) => {
     error = 'No restaurant id in URL'
     callback(error, null);
   } else {
-    DBHelper.fetchRestaurantById(id, (error, restaurant) => {
+    DBHelper.fetchRestaurantById(id, (error, restaurant) => {      
       self.restaurant = restaurant;
       if (!restaurant) {
         console.error(error);
