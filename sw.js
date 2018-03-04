@@ -9,6 +9,7 @@ self.addEventListener('install', function(event) {
     // Add all the default files to the cache
     return cache.addAll([
         '/',
+        '/img/*.jpg',
         'restaurant.html',
         'index.html',
         'js/app.js',
@@ -49,26 +50,17 @@ self.addEventListener('fetch', function(event){
   if(url.startsWith('chrome-extension://') 
     || url.startsWith('https://csi.gstatic.com')
     || url.startsWith('https://maps.googleapis.com')
-    || url.endsWith('.jpg') // we'll cache the images later on with indexedDB
   ){
     return fetch(event.request);
   }
-  
+
   event.respondWith(
-    caches.match(event.request).then(function(response) {
-      if(response) {return response;}
-
-      var requestClone = event.request.clone();
-      fetch(requestClone).then(function(response){
-          if(!response) {return response} // no response from fetch
-
-          var responseClone = response.clone();
-
-          caches.open(cacheName).then(function(cache){
-            cache.put(event.request , responseClone);
-
-            return response;
-          });
+    caches.open(cacheName).then(function(cache) {
+      return cache.match(event.request).then(function (response) {
+        return response || fetch(event.request).then(function(response) {
+          cache.put(event.request, response.clone());
+          return response;
+        });
       });
     })
   );
