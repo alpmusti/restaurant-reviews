@@ -5,7 +5,7 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     // Open the cache
     caches.open(cacheName).then(function(cache) {
-
+//
     // Add all the default files to the cache
     return cache.addAll([
         '/',
@@ -44,7 +44,7 @@ self.addEventListener('activate', function(event) {
   ); // end event.waitUntil
 });
 
-self.addEventListener('fetch', function(event){
+self.addEventListener('fetch', function(event){  
   var url = event.request.url;
   // 404 Handling
   if(url.startsWith('chrome-extension://') 
