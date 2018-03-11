@@ -10,6 +10,13 @@ var uglify = require('gulp-uglify-es').default;
 var babel = require('gulp-babel');
 var pngquant = require('imagemin-pngquant');
 var image = require('gulp-image');
+var browserify = require('browserify');
+var babelify = require('babelify')
+var source = require("vinyl-source-stream");
+var buffer = require("vinyl-buffer");
+var sourcemaps = require('gulp-sourcemaps');
+var watchify = require('watchify');
+var merge = require('utils-merge');
 
 gulp.task('default' , function(){
     gulp.watch('sass/**/*.scss',['styles']);
@@ -33,9 +40,11 @@ gulp.task('styles' , function(){
 
 gulp.task('scripts:main' , function(){
     gulp.src(['./scripts/**/*.js' , '!./scripts/restaurant_info.js'])
+        .pipe(babel())
         .pipe(concat('main_all.js'))
         .pipe(uglify())
-        .pipe(gulp.dest('./dist/js'));
+        .pipe(gulp.dest('./dist/js'))
+        .pipe(gulp.dest('./js'));
 });
 
 gulp.task('scripts:sw' , function(){
@@ -50,7 +59,8 @@ gulp.task('scripts:restaurant' , function(){
         .pipe(babel())
         .pipe(concat('restaurant_all.js'))
         .pipe(uglify())
-        .pipe(gulp.dest('./dist/js'));
+        .pipe(gulp.dest('./dist/js'))
+        .pipe(gulp.dest('./js'));
 });
 
 gulp.task('imagemin', function () {
@@ -81,14 +91,54 @@ gulp.task('serve' , function(){
     });
 });
 
-gulp.task('dist' , ['copy-files' , 'imagemin' , 'styles' , 'scripts:main' , 'scripts:restaurant', 'scripts:sw' , 'clean:tmp']);
+gulp.task('idb' , function(){
+    browserify({
+        entries: ["./js/idb.js"]
+    })
+    .transform(babelify.configure({
+        presets : ["es2015"]
+    }))
+    .bundle()
+    .pipe(source("bundle.js"))
+    .pipe(buffer())
+    .pipe(sourcemaps.init())
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./maps'))
+    .pipe(gulp.dest("./dist/js/test"));
+});
+
+gulp.task('watchify', function () {
+    var args = merge(watchify.args, { debug: true });
+    var bundler = watchify(browserify('./js/idb.js', args)).transform(babelify.configure({
+        presets : ["es2015"]
+    }));
+    bundle_js(bundler);
+  
+    bundler.on('update', function () {
+      bundle_js(bundler)
+    })
+  })
+  
+  function bundle_js(bundler) {
+    return bundler.bundle()
+    .pipe(source("bundle.js"))
+    .pipe(buffer())
+    .pipe(sourcemaps.init())
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./maps'))
+    .pipe(gulp.dest("./js/idb"));
+  }
+
+gulp.task('dist' , ['copy-files' , 'imagemin' , 'styles' , 'idb' , 'scripts:main' , 'scripts:restaurant', 'scripts:sw' , 'clean:tmp']);
 
 gulp.task('default' , [
     'styles' ,
-    'imagemin' ,
+    'imagemin',
     'scripts:main',
     'scripts:restaurant',
+    'watchify',
     'serve' ,
     'clean:tmp'
+
 ]);
  
