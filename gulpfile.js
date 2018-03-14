@@ -3,12 +3,10 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer');
 var browserSync = require('browser-sync').create();
-var imagemin = require('gulp-imagemin');
 var del = require('del');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify-es').default;
 var babel = require('gulp-babel');
-var pngquant = require('imagemin-pngquant');
 var image = require('gulp-image');
 var browserify = require('browserify');
 var babelify = require('babelify')
@@ -66,17 +64,6 @@ gulp.task('scripts:restaurant' , function(){
 gulp.task('imagemin', function () {
     gulp.src('./images/**/*')
         .pipe(image())
-        // .pipe(imagemin([
-        //     imagemin.gifsicle({interlaced: true}),
-        //     imagemin.jpegtran({progressive: true}),
-        //     imagemin.optipng({optimizationLevel: 5}),
-        //     imagemin.svgo({
-        //         plugins: [
-        //             {removeViewBox: true},
-        //             {cleanupIDs: false}
-        //         ]
-        //     })
-        // ]))
         .pipe(gulp.dest('./dist/img'));
 });
 
@@ -93,7 +80,7 @@ gulp.task('serve' , function(){
 
 gulp.task('idb' , function(){
     browserify({
-        entries: ["./js/idb.js"]
+        entries: ["./js/idb/index.js"]
     })
     .transform(babelify.configure({
         presets : ["es2015"]
@@ -110,23 +97,23 @@ gulp.task('idb' , function(){
 gulp.task('watchify', function () {
     var args = merge(watchify.args, { debug: true });
     var bundler = watchify(browserify('./js/idb.js', args)).transform(babelify.configure({
-        presets : ["es2015"]
+        presets : ["env"]
     }));
     bundle_js(bundler);
   
     bundler.on('update', function () {
-      bundle_js(bundler)
-    })
+      bundle_js(bundler);
+    });
   })
   
-  function bundle_js(bundler) {
+  function bundle_js(bundler,dist) {
     return bundler.bundle()
     .pipe(source("bundle.js"))
     .pipe(buffer())
     .pipe(sourcemaps.init())
     .pipe(uglify())
     .pipe(sourcemaps.write('./maps'))
-    .pipe(gulp.dest("./js/idb"));
+    .pipe(gulp.dest(`./js/idb`));
   }
 
 gulp.task('dist' , ['copy-files' , 'imagemin' , 'styles' , 'idb' , 'scripts:main' , 'scripts:restaurant', 'scripts:sw' , 'clean:tmp']);
@@ -139,6 +126,5 @@ gulp.task('default' , [
     'watchify',
     'serve' ,
     'clean:tmp'
-
 ]);
  

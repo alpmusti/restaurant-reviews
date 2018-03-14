@@ -3,7 +3,6 @@ let restaurants,
   cuisines
 var map
 var markers = []
-
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
@@ -148,8 +147,7 @@ createRestaurantHTML = (restaurant) => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  //image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  image.setAttribute('data-src' , DBHelper.imageUrlForRestaurant(restaurant));
+  image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.alt = restaurant.name + " restaurant's photo.";
   li.append(image);
 
@@ -187,12 +185,5 @@ addMarkersToMap = (restaurants = self.restaurants) => {
       window.location.href = marker.url
     });
     self.markers.push(marker);
-  });
-  
-  [].forEach.call(document.querySelectorAll('img[data-src]'),    function(img) {
-    img.setAttribute('src', img.getAttribute('data-src'));
-    img.onload = function() {
-      img.removeAttribute('data-src');
-    };
   });
 }

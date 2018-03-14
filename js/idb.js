@@ -1,8 +1,6 @@
 import idb from 'idb';
 
-console.log("test 3");
-
-var dbPromise = idb.open('test-db' , 1 , function(upgradeDb){
-    var keyvalStore = upgradeDb.createObjectStore('keyval');
-    keyvalStore.put('world' , 'hello');
+idb.open('tetsda' , 1 , function(upgradeDB) {
+    var store = upgradeDB.createObjectStore('tas');
+    store.put('world', 'hello');
 });
