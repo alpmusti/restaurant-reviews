@@ -9,13 +9,12 @@ self.addEventListener('install', function(event) {
     // Add all the default files to the cache
     return cache.addAll([
         '/',
-        '/img/*.jpg',
+        '/img',
         'restaurant.html',
         'index.html',
         'js/app.js',
         'js/main.js',
         'js/dbhelper.js',
-        'data/restaurants.json',
         'js/restaurant_info.js',
         'css/styles.css',
         'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css',

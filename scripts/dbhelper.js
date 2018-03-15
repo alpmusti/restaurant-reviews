@@ -3,6 +3,11 @@
  */
 class DBHelper {
 
+  openDatabase(){
+    if(!navigator.serviceWorker) {
+      return Promise.resolve(); 
+    }
+  }
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -176,3 +181,5 @@ class DBHelper {
   }
 
 }
+
+module.exports = DBHelper;
