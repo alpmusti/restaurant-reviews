@@ -1,12 +1,16 @@
+import idb from 'idb';
 /**
  * Common database helper functions.
  */
+var dbPromise;
 class DBHelper {
-
-  openDatabase(){
-    if(!navigator.serviceWorker) {
-      return Promise.resolve(); 
-    }
+  /**
+   * Open a IDB Database
+   */
+  static openDatabase() {
+    return idb.open('restaurants' , 1  , function(upgradeDb) {
+      upgradeDb.createObjectStore('restaurants' ,{keyPath: 'id'});
+    });
   }
   /**
    * Database URL.
@@ -18,30 +22,62 @@ class DBHelper {
   }
 
   /**
+   * Show cached restaurants stored in IDB
+   */
+  static getCachedMessages(){
+    dbPromise = DBHelper.openDatabase();    
+    return dbPromise.then(function(db){
+
+      //if we showing posts or very first time of the page loading. 
+      //we don't need to go to idb
+      if(!db) return;      
+
+      var tx = db.transaction('restaurants');
+      var store = tx.objectStore('restaurants');
+
+      return store.getAll();
+    });
+  }
+
+  /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants(callback) {   
-    fetch(DBHelper.DATABASE_URL , {credentials:'same-origin'})
-    .then(res => res.json())
-    .then(data => {
-        return callback(null,data)
-    })
-    .catch(err => {
-      return callback(err , null)
+  static fetchRestaurants(callback) { 
+    DBHelper.getCachedMessages().then(function(data){
+      // if we have data to show then we pass it immediately.
+      if(data.length > 0){        
+        return callback(null , data);
+      } 
+      
+      // After passing the cached messages. 
+      // We need to update the cache with fetching restaurants from network.
+      fetch(DBHelper.DATABASE_URL , {credentials:'same-origin'})
+      .then(res => res.json())
+      .then(data => {        
+        dbPromise.then(function(db){
+          if(!db) return db;
+
+          var tx = db.transaction('restaurants' , 'readwrite');
+          var store = tx.objectStore('restaurants');
+  
+          data.forEach(restaurant => store.put(restaurant));
+  
+          // limit the data for 30
+          store.openCursor(null , 'prev').then(function(cursor){
+            return cursor.advance(30);
+          })
+          .then(function deleteRest(cursor){
+            if(!cursor) return;
+            cursor.delete();
+            return cursor.continue().then(deleteRest);
+          });
+        });
+        return callback(null,data);
+      })
+      .catch(err => {                 
+        return callback(err , null)
+      });
     });
-    /*let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        //const json = JSON.parse(xhr.responseText);
-        const restaurants = JSON.parse(xhr.responseText);//json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();*/
   }
 
   /**

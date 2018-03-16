@@ -427,3 +427,12 @@ nav h1 a {
     width:90%!important;
   }
 }
+
+.hidden{
+  visibility: hidden;
+  transition: all .5s;
+}
+.show{
+  visibility: visible;
+  transition: all .5s;
+}

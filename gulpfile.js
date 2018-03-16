@@ -31,7 +31,7 @@ gulp.task('scripts:main', () => {
 });
 
 gulp.task('scripts:restaurant', () => {
-    browserify(['scripts/restaurant_info.js' , 'scripts/dbhelper.js','scripts/app.js', './sw.js' ])
+    browserify(['scripts/restaurant_info.js' , 'scripts/dbhelper.js' , 'scripts/app.js' , './sw.js'])
     .transform(babelify.configure({
       presets: ['env']
     }))
@@ -46,7 +46,7 @@ gulp.task('scripts:restaurant', () => {
   });
 
 gulp.task('watch' , () => {
-  gulp.watch('./scripts/**/*.js' , ['scripts:main' , 'scripts:restaurant']);
+  gulp.watch(['./sw.js' , './scripts/**/*.js'] , ['scripts:main' , 'scripts:restaurant']);
 });
 
 gulp.task('serve', ['styles'] , () => {

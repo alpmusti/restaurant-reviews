@@ -1,4 +1,6 @@
 /*eslint no-console: 0*/
+import dbhelper from './dbhelper';
+
 /**
  * Register a
  * ServiceWorker

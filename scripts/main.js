@@ -1,18 +1,67 @@
 import DBHelper from './dbhelper';
-import idb from 'idb';
 
 let restaurants,
   neighborhoods,
-  cuisines
-var map
-var markers = []
+  cuisines;
+var map;
+var markers = [];
+var observer;
+var numSteps = 20.0;
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {  
+  setIntersectObservers();
+  setEventListeners();
   fetchNeighborhoods();
   fetchCuisines();
 });
+
+/**
+ * Set event listeners for filter changing
+ */
+var setEventListeners = () => {
+  var neighborHoodSelect = document.getElementById('neighborhoods-select');
+  neighborHoodSelect.addEventListener('change' , function(){
+    updateRestaurants();
+  });
+
+  var cuisineSelect = document.getElementById('cuisines-select');
+  cuisineSelect.addEventListener('change' , function(){
+    updateRestaurants();
+  });
+}
+
+var setIntersectObservers = () => {
+  var options = {
+    root: document.querySelector('#scrollArea'),
+    rootMargin: '0px',
+    threshold: buildThresholdList()
+  }
+  
+  observer = new IntersectionObserver(handleIntersect, options);
+}
+
+var buildThresholdList = () => {
+  var thresholds = [];
+
+  for (var i=1.0; i<=numSteps; i++) {
+    var ratio = i/numSteps;
+    thresholds.push(ratio);
+  }
+
+  thresholds.push(0);
+  return thresholds;
+}
+
+var handleIntersect = (entries , observer) => {
+  entries.forEach((entry) => {
+    if(entry.intersectionRatio > 0.25){ 
+      entry.target.classList.remove('hidden');
+      entry.target.classList.add('show');
+    }
+  });
+}
 
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -51,7 +100,7 @@ var fillNeighborhoodsHTML = (data = neighborhoods) => {
 var fetchCuisines = () => {
   DBHelper.fetchCuisines((error, data) => {
     if (error) { // Got an error!
-      console.error(error);
+      console.error(error);      
     } else {
       cuisines = data;
       fillCuisinesHTML();
@@ -137,7 +186,7 @@ var fillRestaurantsHTML = (data = restaurants) => {
   const ul = document.getElementById('restaurants-list');
   data.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
-  });
+  });  
   addMarkersToMap();
 }
 
@@ -146,6 +195,7 @@ var fillRestaurantsHTML = (data = restaurants) => {
  */
 var createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
+  li.className = "post";
   li.setAttribute("role" , "listitem");
 
   const image = document.createElement('img');
@@ -172,8 +222,10 @@ var createRestaurantHTML = (restaurant) => {
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   more.setAttribute("aria-label" , `View details of ${restaurant.name}'s restaurant`);
-  li.append(more)
+  li.append(more);
+  li.classList.add('hidden');
 
+  observer.observe(li);
   return li
 }
 

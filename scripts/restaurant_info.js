@@ -2,7 +2,6 @@ import DBHelper from './dbhelper';
 
 let restaurant;
 var map;
-var cacheName = 'restaurant-reviews-v1';
 /**
  * Initialize Google map, called from HTML.
  */
