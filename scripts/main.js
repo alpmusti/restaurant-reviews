@@ -56,7 +56,13 @@ var buildThresholdList = () => {
 
 var handleIntersect = (entries , observer) => {
   entries.forEach((entry) => {
-    if(entry.intersectionRatio > 0.25){ 
+    const image = entry.target.firstChild;      
+    if(entry.intersectionRatio > 0.25){       
+      const imageSrc = image.getAttribute('data-src');      
+      
+      image.src = (imageSrc) ? imageSrc : image.src;
+      image.removeAttribute('data-src');
+      
       entry.target.classList.remove('hidden');
       entry.target.classList.add('show');
     }
@@ -200,7 +206,8 @@ var createRestaurantHTML = (restaurant) => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.setAttribute('data-src' , DBHelper.imageUrlForRestaurant(restaurant));
+  //image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.alt = restaurant.name + " restaurant's photo.";
   li.append(image);
 
