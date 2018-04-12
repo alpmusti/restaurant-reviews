@@ -42,13 +42,18 @@
       <h2 id="restaurant-name" tabindex="0"></h2>
       <img id="restaurant-img">
       <p id="restaurant-cuisine"></p>
-      <p id="restaurant-address" tabindex="0"></p>
+      <div id="fav-container">
+        <p id="restaurant-address" tabindex="0"></p>
+        <button id="restaurant-fav" onclick="addToFav()" aria-label="Add favorite this restaurant">
+            <img id="icon-favorite" src="./img/favorite.svg"> Add Favorite
+          </button>
+      </div>
       <table id="restaurant-hours" tabindex="0"></table>
     </section>
     <!-- end restaurant -->
     <!-- Beginning reviews -->
     <section id="reviews-container">
-      <ul id="reviews-list"></ul>
+      <ul id="reviews-list"></ul>      
     </section>
     <!-- End reviews -->
   </main>

@@ -112,6 +112,24 @@ var fillReviewsHTML = (reviews = restaurant.reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
+
+  //add comment section bottom
+  const commentContainer = document.createElement('div');
+  const textArea = document.createElement('textarea');
+  const sendButton = document.createElement('button');
+  textArea.placeholder = 'Post a review about this restaurant';
+  textArea.setAttribute('aria-label' , 'Post a review about this restaurant.');
+  sendButton.setAttribute('aria-label' , 'Post a review');
+  sendButton.setAttribute('onclick' , 'alert("hi")');
+  
+  sendButton.innerHTML = 'Send';
+  
+  commentContainer.id = 'comment-container';
+  
+  commentContainer.append(textArea);
+  commentContainer.append(sendButton);
+
+  container.appendChild(commentContainer);
 }
 
 /**

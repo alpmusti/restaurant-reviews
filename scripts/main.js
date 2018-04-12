@@ -226,10 +226,16 @@ var createRestaurantHTML = (restaurant) => {
   li.append(address);
 
   const more = document.createElement('a');
+  const fav = more.cloneNode();
+  fav.innerHTML = 'Add Favorite';
+  fav.classList.add('add-favorite');
+  fav.setAttribute('aria-label' , `Add favorite to ${restaurant.name}'s resturant.`)
+  fav.setAttribute('onclick' , 'alert("Coming soon..");');
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   more.setAttribute("aria-label" , `View details of ${restaurant.name}'s restaurant`);
   li.append(more);
+  li.append(fav);
   li.classList.add('hidden');
 
   observer.observe(li);

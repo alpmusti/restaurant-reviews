@@ -47,9 +47,12 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event){   
-  var requestUrl = new URL(event.request.url);
+  var requestUrl = new URL(event.request.url);  
 
-  if (requestUrl.pathname.startsWith('/restaurants/')) {
+  if (requestUrl.pathname.startsWith('/restaurants/')  || 
+      requestUrl.pathname.endsWith('.map') ||
+      requestUrl.pathname.startsWith('/browser-sync')
+  ) {
     return;
   }  
 
