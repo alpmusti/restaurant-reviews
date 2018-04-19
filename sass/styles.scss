@@ -43,16 +43,32 @@ img{
   opacity: 1;
   transition: opacity 0.3s;
 }
+button{
+  border: none;
+  outline: none;
+}
 img[data-src]{
   opacity: 0;
 }
 #main-content {
 background-color: #f3f3f3;
 min-height: 100%;
+display: flex;
+flex-wrap: wrap;
+}
+
+#map-container{
+  order: 0;
+  width: 100%;
+}
+
+.restaurant-results{
+  order: 1;
+  width: 100%;
 }
 
 #maincontent {
-  background-color: #f3f3f3;
+  background-color: #250f0f;
   /* min-height: 100%; */
   display:flex;
   flex-wrap: wrap;
@@ -167,7 +183,7 @@ nav h1 a {
   display: inline-block;
   box-shadow: 5px 10px 5px 2px rgba(128 , 128 , 128 , 0.5);
   font-weight: 300;
-  transition: transform .4s;
+  transition: all .4s;
 }
 
 #restaurants-list li:hover {
@@ -193,6 +209,8 @@ nav h1 a {
   margin: 0;
   font-size: 11pt;
 }
+
+#restaurants-list li button,
 #restaurants-list li a {
   background-color: #AD5C00;
   color: #fff;
@@ -207,9 +225,27 @@ nav h1 a {
   width: ((calc(100% - 50px)) / 2);
 }
 
-#restaurants-list li a.add-favorite{
+#fav-container button {
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 12px 10px;
+}
+
+#fav-container .add-favorite,
+#restaurants-list li .add-favorite{
   background-color: #f1c40f;
   color: #333;
+}
+
+#fav-container .un-favorite,
+#restaurants-list li .un-favorite{
+  background-color: #ddd;
+  color: #333; 
+}
+
+.favorite{
+  border-top: 5px solid gold;
+  transition: border-top 1.5s ease-in-out;
 }
 
 /* ====================== Restaurant Details ====================== */
@@ -247,6 +283,14 @@ nav h1 a {
   margin: 15px 0 30px;
   text-transform: uppercase;
   line-height: 1.1;
+  display: table-cell;
+}
+#star{
+  visibility: hidden;
+  display: table-cell;
+  font-size: 36px;
+  padding-left: 15px;
+  color: gold;
 }
 #restaurant-img {
 	width: 90%;
@@ -481,6 +525,15 @@ nav h1 a {
     position: relative!important;
   }
 
+  .home-map{
+    display: none;    
+    height: 75vw!important;
+  }
+
+  .show-map{
+    display: block;    
+  }
+
   #reviews-container{
     order: 2;
     padding: 70px 25px 80px 20px;
@@ -498,7 +551,49 @@ nav h1 a {
   transition: opacity .5s;
 }
 .show{
-  visibility: visible;
+  visibility: visible!important;
   opacity: 1;
-  transition: opacity .5s;
+  transition: all .5s;
+}
+
+/*=================== Snackbar ==============*/
+#snackbar {
+  visibility: hidden;
+  width: 100%;
+  height: 15px;
+  background-color: #616161;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  bottom: 0;
+  z-index: 1;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;} 
+  to {bottom: 0; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 0; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 0; opacity: 1;} 
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 0; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
 }

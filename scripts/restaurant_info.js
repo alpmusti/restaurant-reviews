@@ -1,6 +1,6 @@
 import DBHelper from './dbhelper';
 
-let restaurant;
+var restaurant;
 var map;
 /**
  * Initialize Google map, called from HTML.
@@ -49,12 +49,32 @@ var fetchRestaurantFromURL = (callback) => {
 /**
  * Create restaurant HTML and add it to the webpage
  */
-var fillRestaurantHTML = (data = restaurant) => {
+var fillRestaurantHTML = (data = restaurant) => {  
+  const favContainer = document.getElementById('fav-container');
   const name = document.getElementById('restaurant-name');
   name.innerHTML = data.name;
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = data.address;
+
+  const favorite = document.createElement('button');
+  let buttonTitle , ariaText, className;  
+  if(!data.is_favorite ||data.is_favorite == 'false'){    
+    buttonTitle = 'Add Favorite'
+    ariaText = `Add ${data.name}'s restaurant to your favorites.`;
+    className = 'add-favorite';
+  }else{
+    buttonTitle = 'Unfavorite';
+    ariaText = `Remove ${data.name}'s restaurant from your favorites.`;
+    className = 'un-favorite';
+  }
+  favorite.innerHTML = buttonTitle;
+  favorite.setAttribute('aria-label',  ariaText);
+  favorite.className = className;
+  favorite.addEventListener('click' , () => {
+    handleFavorite(data , favorite); 
+  });
+  favContainer.appendChild(favorite);
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
@@ -70,6 +90,30 @@ var fillRestaurantHTML = (data = restaurant) => {
   }
   // fill reviews
   fillReviewsHTML();
+}
+
+/**
+ * Handle favorite button
+ */
+var handleFavorite = (data , fav) => {
+  DBHelper.setFavorite(data.id , data.is_favorite)
+  .then((data) => {     
+    let message;
+    document.getElementById('star').classList.toggle('show');
+    if(fav.classList.contains('add-favorite')){
+      fav.classList.replace('add-favorite' , 'un-favorite');
+      fav.innerHTML = 'Unfavorite';
+      message = 'This restaurant successfully added to your favorites';
+    }else{
+      fav.classList.replace('un-favorite' , 'add-favorite');
+      fav.innerHTML = 'Add Favorite';
+      message = 'This restaurant successfully removed from your favorites';
+    }
+    DBHelper.showMessage(message);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
 }
 
 /**
@@ -95,7 +139,7 @@ var fillRestaurantHoursHTML = (operatingHours = restaurant.operating_hours) => {
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-var fillReviewsHTML = (reviews = restaurant.reviews) => {
+var fillReviewsHTML = (reviews = restaurant.reviews) => {  
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
@@ -114,23 +158,79 @@ var fillReviewsHTML = (reviews = restaurant.reviews) => {
   container.appendChild(ul);
 
   //add comment section bottom
-  const commentContainer = document.createElement('div');
+  createCommentSection(container,restaurant);
+}
+
+/**
+ * Create a comment section bottom of the reviews.
+ */
+var createCommentSection = (container,restaurant) => {
+  const form = document.createElement('form');
   const textArea = document.createElement('textarea');
   const sendButton = document.createElement('button');
+
+  textArea.id = 'comment-text';
   textArea.placeholder = 'Post a review about this restaurant';
   textArea.setAttribute('aria-label' , 'Post a review about this restaurant.');
-  sendButton.setAttribute('aria-label' , 'Post a review');
-  sendButton.setAttribute('onclick' , 'alert("hi")');
   
+  sendButton.setAttribute('aria-label' , 'Post a review');  
   sendButton.innerHTML = 'Send';
+  sendButton.type = 'submit';
   
-  commentContainer.id = 'comment-container';
-  
-  commentContainer.append(textArea);
-  commentContainer.append(sendButton);
+  form.id = 'comment-container';  
+  form.append(textArea);
+  form.append(createRatingBars());
+  form.append(sendButton);  
 
-  container.appendChild(commentContainer);
+  setFormListener(form,restaurant.id);
+
+  container.appendChild(form);
 }
+
+/**
+ * Set a form listener to submit
+ */
+var setFormListener = (form,id) => {
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+    const rating = parseInt(document.querySelector('input[name="rating"]:checked').value);    
+    const commentText = stripHtmlTags(document.getElementById('comment-text').value);      
+    console.log(commentText);
+    
+  }, false);
+}
+
+/**
+ * Strip html tags
+ */
+
+ var stripHtmlTags = (string) => {
+  return string.replace(/(<([^>]+)>)/ig,"");  
+ }
+
+/**
+ * Create rating radio buttons
+ */
+
+ var createRatingBars = () => {
+  const ratingDiv = document.createElement('div');
+  ratingDiv.classList.add('rating-container');
+  for(var i = 0; i < 5 ;i++){
+    const input = document.createElement('input');
+    const label = document.createElement('label');
+    label.htmlFor = `rating-${i+1}`;
+    label.innerHTML = `${i+1}`;    
+
+    input.type = 'radio';
+    input.id = `rating-${i+1}`;
+    input.name = 'rating';
+    input.value = i+1;
+    ratingDiv.appendChild(label);
+    ratingDiv.appendChild(input);
+  }
+
+  return ratingDiv;
+ }
 
 /**
  * Create review HTML and add it to the webpage.

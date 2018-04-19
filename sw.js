@@ -1,4 +1,4 @@
-var contentCache = 'restaurants-static-v2';
+var contentCache = 'restaurants-static-v3';
 var contentImgsCache = "restaurants-content-imgs";
 
 var allCaches = [
@@ -17,8 +17,6 @@ self.addEventListener('install', function(event) {
         '/',
         '/img/icon.png',
         'js/main_bundle.js',
-        'js/maps/main_bundle.js.map',
-        'js/maps/restaurant_bundle.js.map',
         'js/restaurant_bundle.js',
         'css/styles.css',
         'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css',
@@ -50,7 +48,6 @@ self.addEventListener('fetch', function(event){
   var requestUrl = new URL(event.request.url);  
 
   if (requestUrl.pathname.startsWith('/restaurants/')  || 
-      requestUrl.pathname.endsWith('.map') ||
       requestUrl.pathname.startsWith('/browser-sync')
   ) {
     return;

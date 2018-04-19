@@ -3,20 +3,19 @@ import DBHelper from './dbhelper';
 let restaurants,
   neighborhoods,
   cuisines;
-var map;
-var markers = [];
-var observer;
-var numSteps = 20.0;
+let map;
+let markers = [];
+let observer , mapObserver;
+let numSteps = 20.0;
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {  
-  setIntersectObservers();
-  setEventListeners();
-  fetchNeighborhoods();
-  fetchCuisines();
+    setIntersectObservers();
+    setEventListeners();
+    fetchNeighborhoods();
+    fetchCuisines(); 
 });
-
 /**
  * Set event listeners for filter changing
  */
@@ -38,7 +37,7 @@ var setIntersectObservers = () => {
     rootMargin: '0px',
     threshold: buildThresholdList()
   }
-  
+
   observer = new IntersectionObserver(handleIntersect, options);
 }
 
@@ -54,9 +53,20 @@ var buildThresholdList = () => {
   return thresholds;
 }
 
+function handleMap(entries , observer){
+  entries.forEach((entry) => {
+    let map = document.getElementById('map');    
+    if(entry.intersectionRatio > 0.25){
+      map.classList.add('show-map');
+    }else{
+      map.classList.remove('show-map');
+    }
+  });
+}
+
 var handleIntersect = (entries , observer) => {
   entries.forEach((entry) => {
-    const image = entry.target.firstChild;      
+    const image = entry.target.firstChild;    
     if(entry.intersectionRatio > 0.25){       
       const imageSrc = image.getAttribute('data-src');      
       
@@ -193,6 +203,14 @@ var fillRestaurantsHTML = (data = restaurants) => {
   data.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });  
+  
+  var options = {
+    root: document.querySelector('#scrollArea'),
+    rootMargin: '0px',
+    threshold: buildThresholdList()
+  }
+  mapObserver = new IntersectionObserver(handleMap, options);
+  mapObserver.observe(document.getElementById('map-container'));
   addMarkersToMap();
 }
 
@@ -226,11 +244,23 @@ var createRestaurantHTML = (restaurant) => {
   li.append(address);
 
   const more = document.createElement('a');
-  const fav = more.cloneNode();
-  fav.innerHTML = 'Add Favorite';
-  fav.classList.add('add-favorite');
-  fav.setAttribute('aria-label' , `Add favorite to ${restaurant.name}'s resturant.`)
-  fav.setAttribute('onclick' , 'alert("Coming soon..");');
+  const fav = document.createElement('button');
+
+  // extra OR statement here because of server side problem
+  if(!restaurant.is_favorite || restaurant.is_favorite == 'false') { 
+    fav.innerHTML = 'Add Favorite';
+    fav.className = 'add-favorite';
+    fav.setAttribute('aria-label' , `Add favorite to ${restaurant.name}'s resturant.`)
+  }else{
+    li.classList.add('favorite');
+    fav.innerHTML = 'Unfavorite';
+    fav.className = 'un-favorite';
+    fav.setAttribute('aria-label' , `Remove ${restaurant.name}'s resturant from your favorite.`)
+  }
+  fav.addEventListener('click' , function(){
+    handleFavorite(restaurant.id , li , fav);    
+  });
+
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   more.setAttribute("aria-label" , `View details of ${restaurant.name}'s restaurant`);
@@ -240,6 +270,33 @@ var createRestaurantHTML = (restaurant) => {
 
   observer.observe(li);
   return li
+}
+
+/**
+ * Handle favorite logic
+ */
+var handleFavorite = (restaurantId , li , fav) => {
+  let isFavorite = restaurants[restaurantId - 1].is_favorite;
+  
+  DBHelper.setFavorite(restaurantId , isFavorite)
+  .then((data) => {
+    restaurants[data.id - 1] = data;
+    li.classList.toggle('favorite');
+    let message;
+    if(fav.classList.contains('add-favorite')){
+      fav.classList.replace('add-favorite' , 'un-favorite');
+      fav.innerHTML = 'Unfavorite';
+      message = 'This restaurant successfully added to your favorites';
+    }else{
+      fav.classList.replace('un-favorite' , 'add-favorite');
+      fav.innerHTML = 'Add Favorite';
+      message = 'This restaurant successfully removed from your favorites';
+    }
+    DBHelper.showMessage(message);    
+  })
+  .catch((err) => {
+    console.error(err);
+  });
 }
 
 /**

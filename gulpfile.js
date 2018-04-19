@@ -13,6 +13,7 @@ gulp.task('styles' , () => {
   return gulp.src('./sass/**/*.scss')
   .pipe(sass({outputStyle: 'compressed'}).on('error' , sass.logError))
   .pipe(gulp.dest('./css'))
+  .pipe(gulp.dest('./dist/css'))
   .pipe(browserSync.stream());
 });
 
@@ -26,8 +27,9 @@ gulp.task('scripts:main', () => {
   .pipe(buffer())
   .pipe(sourcemaps.init())
   .pipe(uglify())
-  .pipe(sourcemaps.write('maps'))    // You need this if you want to continue using the stream with other plugins
-  .pipe(gulp.dest('./js'));
+  .pipe(sourcemaps.write('maps')) // You need this if you want to continue using the stream with other plugins
+  .pipe(gulp.dest('./dist/js'))    
+  .pipe(gulp.dest('./js')); 
 });
 
 gulp.task('scripts:restaurant', () => {
@@ -41,7 +43,7 @@ gulp.task('scripts:restaurant', () => {
     .pipe(sourcemaps.init())
     .pipe(uglify())
     .pipe(sourcemaps.write('maps'))    // You need this if you want to continue using the stream with other plugins
-    .pipe(gulp.dest('dist/js'))
+    .pipe(gulp.dest('./dist/js'))
     .pipe(gulp.dest('./js'));
   });
 
@@ -71,5 +73,5 @@ gulp.task('imagemin', function () {
         .pipe(gulp.dest('./img'));
 });
 
-gulp.task('dist' , ['copy-files' , 'imagemin' , 'styles' , 'scripts:main' , 'scripts:restaurant']);
+gulp.task('dist' , ['imagemin' , 'styles' , 'scripts:main' , 'scripts:restaurant', 'copy-files']);
 gulp.task('default' , ['imagemin' , 'scripts:main', 'scripts:restaurant' , 'watch' , 'serve']);

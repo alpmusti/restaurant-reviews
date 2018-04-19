@@ -43,9 +43,9 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) { 
-    DBHelper.getCachedMessages().then(function(data){
+    DBHelper.getCachedMessages().then(function(data){      
       // if we have data to show then we pass it immediately.
-      if(data.length > 0){        
+      if(data.length > 0 && !navigator.onLine){              
         return callback(null , data);
       } 
       
@@ -53,7 +53,7 @@ class DBHelper {
       // We need to update the cache with fetching restaurants from network.
       fetch(DBHelper.DATABASE_URL , {credentials:'same-origin'})
       .then(res => res.json())
-      .then(data => {        
+      .then(data => {              
         dbPromise.then(function(db){
           if(!db) return db;
 
@@ -214,6 +214,42 @@ class DBHelper {
       animation: google.maps.Animation.DROP}
     );
     return marker;
+  }
+
+  //Send PUT Request to http://localhost:1337/restaurants/<restaurant_id>/?is_favorite={isFavorite}
+  static setFavorite(restaurantId , isFavorite) {
+    // This is required for server-side issue
+    // Server turn boolean values to string values while saving to db.  
+    if(typeof(isFavorite) == 'string'){    
+      isFavorite = (isFavorite == 'false') ? true : false;
+    }else{
+      isFavorite = !isFavorite;
+    }      
+
+    return new Promise((resolve , reject) => {
+      fetch(`${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${isFavorite}` , {
+        method: 'PUT'
+      })
+      .then((res) => {
+        if(res.ok){ 
+          //If response is successful
+          return res.json();
+        }else{
+          reject(new Error(`Request is not successful. Status code is :  ${res.status}`));
+        }
+      }).then((data) => {
+        resolve(data);     
+      });
+    });
+  }
+
+  static showMessage(text){    
+    var snackBar = document.getElementById('snackbar');    
+    snackBar.classList.add("show");
+    snackBar.innerHTML = text;
+    setTimeout(function(){
+      snackBar.classList.remove("show");
+    }, 2000);
   }
 
 }

@@ -3,7 +3,7 @@
 
 <head>
   <!-- Normalize.css for better cross-browser consistency -->
-  <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
+  <link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
   <!-- Main CSS file -->
   <link rel="stylesheet" href="css/styles.css" type="text/css">
   <meta charset="utf-8" />
@@ -40,13 +40,11 @@
     <!-- Beginning restaurant -->
     <section id="restaurant-container">
       <h2 id="restaurant-name" tabindex="0"></h2>
+      <span id="star">&#9733;</span>
       <img id="restaurant-img">
       <p id="restaurant-cuisine"></p>
       <div id="fav-container">
         <p id="restaurant-address" tabindex="0"></p>
-        <button id="restaurant-fav" onclick="addToFav()" aria-label="Add favorite this restaurant">
-            <img id="icon-favorite" src="./img/favorite.svg"> Add Favorite
-          </button>
       </div>
       <table id="restaurant-hours" tabindex="0"></table>
     </section>
@@ -59,6 +57,7 @@
   </main>
   <!-- End main -->
 
+  <div id="snackbar"></div>
   <!-- Beginning footer -->
   <footer id="footer">
     Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a><br/> All Rights Reserved.
