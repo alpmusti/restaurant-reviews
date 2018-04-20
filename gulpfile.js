@@ -1,16 +1,17 @@
-var gulp = require('gulp');
-var babelify = require('babelify');
-var browserify = require('browserify');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
-var browserSync = require('browser-sync').create();
-var sass = require('gulp-sass');
-var image = require('gulp-image');
+const gulp = require('gulp');
+const babelify = require('babelify');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const uglify = require('gulp-uglify');
+const sourcemaps = require('gulp-sourcemaps');
+const browserSync = require('browser-sync').create();
+const sass = require('gulp-sass');
+const image = require('gulp-image');
+const htmlmin = require('gulp-htmlmin');
 
 gulp.task('styles' , () => {
-  return gulp.src('./sass/**/*.scss')
+  return gulp.src(['./sass/**/main.scss' , './sass/**/restaurant.scss'])
   .pipe(sass({outputStyle: 'compressed'}).on('error' , sass.logError))
   .pipe(gulp.dest('./css'))
   .pipe(gulp.dest('./dist/css'))
@@ -61,6 +62,13 @@ gulp.task('serve', ['styles'] , () => {
   gulp.watch('./**/**.html').on('change' , browserSync.reload);
 });
 
+gulp.task('prod' , function(){
+  browserSync.init({
+    server: './dist',
+    browser: 'google chrome'
+  });
+});
+
 gulp.task('copy-files' , function(){
     gulp.src(['./index.html' , './restaurant.html' , 'manifest.json'])
         .pipe(gulp.dest('./dist'));
@@ -73,5 +81,12 @@ gulp.task('imagemin', function () {
         .pipe(gulp.dest('./img'));
 });
 
-gulp.task('dist' , ['imagemin' , 'styles' , 'scripts:main' , 'scripts:restaurant', 'copy-files']);
-gulp.task('default' , ['imagemin' , 'scripts:main', 'scripts:restaurant' , 'watch' , 'serve']);
+gulp.task('minify', function() {
+  return gulp.src('./src/**.html')
+    .pipe(htmlmin({collapseWhitespace: true}))
+    .pipe(gulp.dest('./dist'))
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('build' , ['imagemin' , 'styles' , 'scripts:main' , 'scripts:restaurant', 'minify' , 'copy-files']);
+gulp.task('default' , ['imagemin' , 'scripts:main', 'scripts:restaurant' , 'watch' , 'minify' , 'serve']);

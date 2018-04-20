@@ -48,7 +48,9 @@ self.addEventListener('fetch', function(event){
   var requestUrl = new URL(event.request.url);  
 
   if (requestUrl.pathname.startsWith('/restaurants/')  || 
-      requestUrl.pathname.startsWith('/browser-sync')
+      requestUrl.pathname.startsWith('/browser-sync') ||
+      requestUrl.pathname.startsWith('/reviews') || 
+      requestUrl.pathname.startsWith('/?restaurant')
   ) {
     return;
   }  

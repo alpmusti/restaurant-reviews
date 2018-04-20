@@ -1,53 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"><link rel="preload" href="css/main.css" as="style"><link rel="preload" href="js/main_bundle.js" as="script"><link rel="shortcut icon" href="img/icon.png"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#2196F3"><link rel="manifest" href="manifest.json"><title>Restaurant Reviews</title><style>.filter-options {
+  width: 100%;
+  height: 75px;
+  background-color: #207AB6;
+  align-items: center;
+}
+.filter-options h2 {
+  color: white;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1;
+  margin: 0 20px;
+}
+.filter-options select {
+  background-color: white;
+  border: 1px solid #fff;
+  font-size: 11pt;
+  height: 35px;
+  letter-spacing: 0;
+  margin: 10px;
+  padding: 0 10px;
+  width: 200px;
+}
+#restaurants-list {
+  background-color: #f3f3f3;
+  list-style: outside none none;
+  padding: 30px 15px 60px;
+  width: 1368px;
+  margin-left: auto;
+  margin-right: auto;
+  /*text-align: center;*/
+}
+#restaurants-list li {
+  background-color: #fff;
+  margin: 5px;
+  min-height: 380px;
+  padding: 0 30px 25px;
+  text-align: left;
+  width: calc((100% - 15px) / 5);
+  display: inline-block;
+  box-shadow: 5px 10px 5px 2px rgba(128 , 128 , 128 , 0.5);
+  font-weight: 300;
+  transition: all .4s;
+}
 
-<head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
-  <link rel="preload" href="css/styles.css" as="style">
-  <link rel="preload" href="js/main_bundle.js" as="script">
-  
-  <link rel="stylesheet" href="css/styles.css">
+#restaurants-list li:hover {
+  transform: scale(1.1);
+}
 
-  <link rel="shortcut icon" href="img/icon.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2196F3" />
-  <link rel="manifest" href="manifest.json" />
-  <title>Restaurant Reviews</title>
-</head>
+#restaurants-list .restaurant-img {
+  display: block;
+  margin: 0;
+  padding:12px 0 0 0;
+  max-width: 100%;
+}
+#restaurants-list li h2 {
+  color: #AD5C00;
+  font-size: 14pt;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.3;
+  margin: 20px 0 10px;
+  text-transform: uppercase;
+}
+#restaurants-list p {
+  margin: 0;
+  font-size: 11pt;
+}
 
-<body>
-  <header>
-    <nav>
-      <h1><a href="/">Restaurant Reviews</a></h1>
-    </nav>
-  </header>
-
-  <main id="main-content">   
-    <section class="restaurant-results">
-      <div class="filter-options">
-          <h2 style="padding-top:5px;">Filter Results</h2>        
-          <select id="neighborhoods-select" aria-label="Filter neighborhoods" name="neighborhoods">
-            <option value="all">All Neighborhoods</option>
-          </select>
-          <select id="cuisines-select" aria-label="Filter cuisines" name="cuisines">
-            <option value="all">All Cuisines</option>
-          </select>
-      </div>
-      <ul id="restaurants-list"></ul>
-    </section>
-    <section id="map-container"role="application" aria-hidden="true" tabindex="-1">
-        <div id="map" class="home-map"></div>
-    </section>
-  </main>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcCqTbTFfqUPyO-KZjllMh1L8vC-779Ow&libraries=places&callback=initMap"></script>
-  <script type="application/javascript" charset="utf-8" src="js/main_bundle.js"></script>
-
-  <div id="snackbar"></div>
-  <footer id="footer">
-    Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a><br/> All Rights Reserved.
-  </footer>
-
-</body>
-
-</html>
+#restaurants-list li button,
+#restaurants-list li a {
+  background-color: #AD5C00;
+  color: #fff;
+  display: inline-block;
+  font-size: 10pt;
+  margin: 15px 5px 0;
+  padding: 6px 12px 10px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: ((calc(100% - 50px)) / 2);
+}
+@media screen and (max-width:996px) {
+  .filter-options select {
+    width: 40%;
+  }
+}</style><link rel="stylesheet" href="css/main.css"></head><body><header><nav><h1><a href="/">Restaurant Reviews</a></h1></nav></header><main id="main-content"><section class="restaurant-results"><div class="filter-options"><h2 style="padding-top:5px;">Filter Results</h2><select id="neighborhoods-select" aria-label="Filter neighborhoods" name="neighborhoods"><option value="all">All Neighborhoods</option></select> <select id="cuisines-select" aria-label="Filter cuisines" name="cuisines"><option value="all">All Cuisines</option></select></div><ul id="restaurants-list"></ul></section><section id="map-container" role="application" aria-hidden="true" tabindex="-1"><div id="map" class="home-map"></div></section></main><script async defer="defer" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcCqTbTFfqUPyO-KZjllMh1L8vC-779Ow&libraries=places&callback=initMap"></script><script type="application/javascript" charset="utf-8" src="js/main_bundle.js"></script><div id="snackbar"></div><footer id="footer">Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a><br>All Rights Reserved.</footer></body></html>

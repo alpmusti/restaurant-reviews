@@ -10,8 +10,9 @@ let numSteps = 20.0;
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
-document.addEventListener('DOMContentLoaded', (event) => {  
+document.addEventListener('DOMContentLoaded', (event) => {
     setIntersectObservers();
+    updateRestaurants();
     setEventListeners();
     fetchNeighborhoods();
     fetchCuisines(); 
@@ -154,7 +155,6 @@ window.initMap = () => {
     center: loc,
     scrollwheel: false
   });
-  updateRestaurants();
 }
 
 /**
@@ -219,7 +219,6 @@ var fillRestaurantsHTML = (data = restaurants) => {
  */
 var createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
-  li.className = "post";
   li.setAttribute("role" , "listitem");
 
   const image = document.createElement('img');

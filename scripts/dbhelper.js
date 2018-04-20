@@ -8,8 +8,13 @@ class DBHelper {
    * Open a IDB Database
    */
   static openDatabase() {
-    return idb.open('restaurants' , 1  , function(upgradeDb) {
-      upgradeDb.createObjectStore('restaurants' ,{keyPath: 'id'});
+    return idb.open('restaurants' , 2  , function(upgradeDb) {
+      switch(upgradeDb.oldVersion) {
+        case 0:
+        upgradeDb.createObjectStore('restaurants' ,{keyPath: 'id'});
+        case 1:
+        upgradeDb.createObjectStore('reviews' ,{keyPath: 'restaurant_id'});
+      }
     });
   }
   /**
@@ -18,14 +23,16 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}`;
   }
 
   /**
    * Show cached restaurants stored in IDB
    */
-  static getCachedMessages(){
-    dbPromise = DBHelper.openDatabase();    
+  static getCachedRestaurants(){
+    if(!dbPromise){
+      dbPromise = DBHelper.openDatabase();    
+    }
     return dbPromise.then(function(db){
 
       //if we showing posts or very first time of the page loading. 
@@ -40,10 +47,45 @@ class DBHelper {
   }
 
   /**
+   * Get cached restaurant by id
+   */
+  static getCachedRestaurantById(id){
+    if(!dbPromise){
+      dbPromise = DBHelper.openDatabase();
+    }
+
+    return dbPromise.then(function(db){
+      if(!db) return db;
+
+      var tx = db.transaction('restaurants');
+      var store = tx.objectStore('restaurants');
+
+      return store.get(parseInt(id));
+    })
+  }
+
+  /**
+   * Show cached reviews stored in IDB
+   */
+  static getCachedReviews(){
+    if(!dbPromise){
+      dbPromise = this.openDatabase();
+    }
+    return dbPromise.then(function(db){
+      if(!db) return db;
+
+      var tx = db.transaction('reviews');
+      var store = tx.objectStore('reviews');
+
+      return store.getAll();
+    });
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) { 
-    DBHelper.getCachedMessages().then(function(data){      
+    DBHelper.getCachedRestaurants().then(function(data){      
       // if we have data to show then we pass it immediately.
       if(data.length > 0 && !navigator.onLine){              
         return callback(null , data);
@@ -51,11 +93,11 @@ class DBHelper {
       
       // After passing the cached messages. 
       // We need to update the cache with fetching restaurants from network.
-      fetch(DBHelper.DATABASE_URL , {credentials:'same-origin'})
+      fetch(`${DBHelper.DATABASE_URL}/restaurants` , {credentials:'same-origin'})
       .then(res => res.json())
       .then(data => {              
         dbPromise.then(function(db){
-          if(!db) return db;
+          if(!db) return;
 
           var tx = db.transaction('restaurants' , 'readwrite');
           var store = tx.objectStore('restaurants');
@@ -97,6 +139,26 @@ class DBHelper {
         }
       }
     });
+  }
+
+  /**
+   * Update a single restaurant's review
+   */
+  static updateSingleRestaurantsReview(reviews){
+    dbPromise.then(function(db){
+      if(!db) return db;
+
+      var tx = db.transaction('reviews' , 'readwrite');
+      var store = tx.objectStore('reviews');
+
+      
+      if(reviews.length > 0){
+        reviews.restaurant_id = parseInt(reviews[0].restaurant_id);              
+        store.put(reviews);
+      }
+
+      return tx.complete;
+    })
   }
 
   /**
@@ -216,6 +278,33 @@ class DBHelper {
     return marker;
   }
 
+  //GET Request to http://localhost:1337/reviews/?restaurant_id=<id>
+  static getReviewsById(id){
+    return new Promise((resolve,reject) => {
+      DBHelper.getCachedReviews().then(function(data){        
+        // if we have data to show then we pass it immediately.
+        if(data.length > 0 && !navigator.onLine){
+          resolve(data[0]);
+        }         
+        
+        fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
+        .then(response => {
+          if(response.ok){
+            return response.json();
+          }
+          reject(new Error(`Request failed with status code : ${response.status}`));
+        })
+        .then(data =>{          
+          DBHelper.updateSingleRestaurantsReview(data);
+          resolve(data);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      });
+    });
+  }
+
   //Send PUT Request to http://localhost:1337/restaurants/<restaurant_id>/?is_favorite={isFavorite}
   static setFavorite(restaurantId , isFavorite) {
     // This is required for server-side issue
@@ -227,7 +316,7 @@ class DBHelper {
     }      
 
     return new Promise((resolve , reject) => {
-      fetch(`${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${isFavorite}` , {
+      fetch(`${DBHelper.DATABASE_URL}/restaurants/${restaurantId}/?is_favorite=${isFavorite}` , {
         method: 'PUT'
       })
       .then((res) => {
@@ -239,6 +328,33 @@ class DBHelper {
         }
       }).then((data) => {
         resolve(data);     
+      });
+    });
+  }
+
+  //Send POST Request to http://localhost:1337/reviews
+  static postReview(resId , name , rating ,comment){
+  // Example:
+  //   {
+  //     "restaurant_id": <restaurant_id>,
+  //     "name": <reviewer_name>,
+  //     "rating": <rating>,
+  //     "comments": <comment_text>
+  // }
+  const post = {restaurant_id: resId , name: name , rating: rating , comments: comment };
+    return new Promise((resolve , reject) => {
+      fetch(`${DBHelper.DATABASE_URL}/reviews` , {
+        method: 'POST',
+        body: JSON.stringify(post)
+      }).then(function(response){
+        if(response.ok){
+          return response.json();
+        }
+        reject(new Error(`Request failed with status code : ${response.status}`));
+      }).then(data => {
+        resolve(data);
+      }).catch(err => {
+        reject(err);
       });
     });
   }

@@ -45,11 +45,10 @@ var fetchRestaurantFromURL = (callback) => {
     });
   }
 }
-
 /**
  * Create restaurant HTML and add it to the webpage
  */
-var fillRestaurantHTML = (data = restaurant) => {  
+var fillRestaurantHTML = (data = restaurant) => {
   const favContainer = document.getElementById('fav-container');
   const name = document.getElementById('restaurant-name');
   name.innerHTML = data.name;
@@ -145,20 +144,26 @@ var fillReviewsHTML = (reviews = restaurant.reviews) => {
   title.innerHTML = 'Reviews';
   container.appendChild(title);
 
-  if (!reviews) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
-    container.appendChild(noReviews);
-    return;
-  }
-  const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
+  DBHelper.getReviewsById(getParameterByName('id'))
+  .then(reviews => {        
+      if (!reviews) {
+        const noReviews = document.createElement('p');
+        noReviews.innerHTML = 'No reviews yet. Be the first one!';
+        container.appendChild(noReviews);
+      }else{
+        const ul = document.getElementById('reviews-list');
+        reviews.forEach(review => {
+          ul.appendChild(createReviewHTML(review));
+        });
+        container.appendChild(ul);
+      }
+    
+      //add comment section to the bottom
+      createCommentSection(container,restaurant);
+  })
+  .catch(err => {
+    console.error(err);
   });
-  container.appendChild(ul);
-
-  //add comment section bottom
-  createCommentSection(container,restaurant);
 }
 
 /**
@@ -168,6 +173,15 @@ var createCommentSection = (container,restaurant) => {
   const form = document.createElement('form');
   const textArea = document.createElement('textarea');
   const sendButton = document.createElement('button');
+  const input = document.createElement('input');
+  const label = document.createElement('label');
+  
+  label.setAttribute('for' , 'name');
+  label.innerHTML = 'Your name: <br/>';
+
+  input.type = 'text';
+  input.placeholder = 'John Doe';
+  input.id = 'name';
 
   textArea.id = 'comment-text';
   textArea.placeholder = 'Post a review about this restaurant';
@@ -178,24 +192,60 @@ var createCommentSection = (container,restaurant) => {
   sendButton.type = 'submit';
   
   form.id = 'comment-container';  
+  form.append(label);
+  form.append(input);
   form.append(textArea);
   form.append(createRatingBars());
   form.append(sendButton);  
 
-  setFormListener(form,restaurant.id);
-
+  
   container.appendChild(form);
+  let div = document.createElement('div');
+  div.id = 'spinner';
+  div.className = 'spinner';
+  container.appendChild(div);
+  setFormListener(div,form,restaurant.id);
 }
 
 /**
  * Set a form listener to submit
  */
-var setFormListener = (form,id) => {
+var setFormListener = (spinner , form,id) => {
   form.addEventListener("submit", function(event) {
     event.preventDefault();
-    const rating = parseInt(document.querySelector('input[name="rating"]:checked').value);    
+    const name = stripHtmlTags(document.getElementById('name').value);
+    if(name.trim().length <= 0){
+      DBHelper.showMessage('You should enter your name.');
+      return;
+    }
+
     const commentText = stripHtmlTags(document.getElementById('comment-text').value);      
-    console.log(commentText);
+    if(commentText.trim().length <= 0){
+      DBHelper.showMessage('You can"t send empty comment.');
+      return;
+    }
+
+    let ratingValue = document.querySelector('input[name="rating"]:checked');
+    let rating;
+    if(ratingValue){
+      rating = parseInt(ratingValue.value);    
+    }else{
+      DBHelper.showMessage('You should select a rating');
+      return;
+    }
+
+    const id = getParameterByName('id');
+    DBHelper.postReview(id , name ,rating, commentText).then(data => {      
+      form.reset();
+      spinner.setAttribute('style' , 'display:block');
+      DBHelper.showMessage('Your review has been succesfully sent.');
+      setTimeout(() => {
+        location.reload();
+      } , 3000);
+    })
+    .catch(err => {
+      DBHelper.showMessage('Your review couldn"t be sent.');
+    });
     
   }, false);
 }
@@ -214,6 +264,9 @@ var setFormListener = (form,id) => {
 
  var createRatingBars = () => {
   const ratingDiv = document.createElement('div');
+  const span = document.createElement('span');
+  span.innerHTML = 'Rate this restaurant :';
+  ratingDiv.appendChild(span);
   ratingDiv.classList.add('rating-container');
   for(var i = 0; i < 5 ;i++){
     const input = document.createElement('input');
@@ -243,7 +296,7 @@ var createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('h6');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.updatedAt).toDateString();
   li.appendChild(date);
 
   const rating = document.createElement('h5');
