@@ -70,7 +70,7 @@ gulp.task('prod' , function(){
 });
 
 gulp.task('copy-files' , function(){
-    gulp.src(['./index.html' , './restaurant.html' , 'manifest.json'])
+    gulp.src(['./index.html' , './restaurant.html' , 'manifest.json' , './sw.js'])
         .pipe(gulp.dest('./dist'));
 });
 

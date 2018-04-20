@@ -8,12 +8,15 @@ class DBHelper {
    * Open a IDB Database
    */
   static openDatabase() {
-    return idb.open('restaurants' , 2  , function(upgradeDb) {
+    return idb.open('restaurants' , 3 , function(upgradeDb) {
       switch(upgradeDb.oldVersion) {
         case 0:
         upgradeDb.createObjectStore('restaurants' ,{keyPath: 'id'});
         case 1:
         upgradeDb.createObjectStore('reviews' ,{keyPath: 'restaurant_id'});
+        case 2:
+        upgradeDb.createObjectStore('comments' ,{keyPath: 'restaurant_id'});
+
       }
     });
   }
@@ -153,7 +156,7 @@ class DBHelper {
 
       
       if(reviews.length > 0){
-        reviews.restaurant_id = parseInt(reviews[0].restaurant_id);              
+        reviews.restaurant_id = parseInt(reviews[0].restaurant_id);
         store.put(reviews);
       }
 
@@ -333,7 +336,7 @@ class DBHelper {
   }
 
   //Send POST Request to http://localhost:1337/reviews
-  static postReview(resId , name , rating ,comment){
+  static postReview(resId , name , rating ,comment , reviews){
   // Example:
   //   {
   //     "restaurant_id": <restaurant_id>,
@@ -352,6 +355,8 @@ class DBHelper {
         }
         reject(new Error(`Request failed with status code : ${response.status}`));
       }).then(data => {
+        reviews.push(data);
+        DBHelper.updateSingleRestaurantsReview(reviews);
         resolve(data);
       }).catch(err => {
         reject(err);
@@ -359,13 +364,62 @@ class DBHelper {
     });
   }
 
-  static showMessage(text){    
+  static storeOfflineReview(resId , name , rating , comment){
+    const post = {restaurant_id: resId , name: name , rating: rating , comments: comment };
+    if(!dbPromise){
+      dbPromise = DBHelper.openDatabase();
+    }
+
+    dbPromise.then(function(db){
+      if(!db) return;
+
+      var tx = db.transaction('comments' , 'readwrite' );
+      var store = tx.objectStore('comments');
+
+      store.put(post);
+
+      return tx.complete;
+    })
+  }
+
+  static postStoredReview(id , reviews){
+    return new Promise((resolve,reject) => {
+      if(!dbPromise){
+        dbPromise = DBHelper.openDatabase
+      }
+      dbPromise.then(function(db){
+          if(!db) return;
+  
+          var tx = db.transaction('comments');
+          var store = tx.objectStore('comments');
+  
+          return store.get(id);
+      }).then(function(review){
+        DBHelper.postReview(review.restaurant_id , review.name , review.rating , review.comments , reviews)
+        .then(data => {
+          dbPromise.then(function(db){
+          var tx = db.transaction('comments',  'readwrite');
+          var store = tx.objectStore('comments');
+
+          store.delete(id);
+  
+          return tx.complete;
+          });
+          resolve(data);
+        }).catch(err => {
+          reject(err);
+        });
+      });
+    });
+  }
+
+  static showMessage(text,  duration = 3000){    
     var snackBar = document.getElementById('snackbar');    
-    snackBar.classList.add("show");
     snackBar.innerHTML = text;
+    snackBar.classList.add("show");
     setTimeout(function(){
       snackBar.classList.remove("show");
-    }, 2000);
+    }, duration);
   }
 
 }

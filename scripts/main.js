@@ -244,17 +244,17 @@ var createRestaurantHTML = (restaurant) => {
 
   const more = document.createElement('a');
   const fav = document.createElement('button');
-
+  fav.setAttribute('role' , 'switch');
   // extra OR statement here because of server side problem
   if(!restaurant.is_favorite || restaurant.is_favorite == 'false') { 
     fav.innerHTML = 'Add Favorite';
     fav.className = 'add-favorite';
-    fav.setAttribute('aria-label' , `Add favorite to ${restaurant.name}'s resturant.`)
+    fav.setAttribute('aria-checked' , "false");
   }else{
     li.classList.add('favorite');
     fav.innerHTML = 'Unfavorite';
     fav.className = 'un-favorite';
-    fav.setAttribute('aria-label' , `Remove ${restaurant.name}'s resturant from your favorite.`)
+    fav.setAttribute('aria-checked' , "true");
   }
   fav.addEventListener('click' , function(){
     handleFavorite(restaurant.id , li , fav);    
@@ -283,12 +283,14 @@ var handleFavorite = (restaurantId , li , fav) => {
     li.classList.toggle('favorite');
     let message;
     if(fav.classList.contains('add-favorite')){
+      fav.setAttribute('aria-checked' , "true");
       fav.classList.replace('add-favorite' , 'un-favorite');
       fav.innerHTML = 'Unfavorite';
       message = 'This restaurant successfully added to your favorites';
     }else{
       fav.classList.replace('un-favorite' , 'add-favorite');
       fav.innerHTML = 'Add Favorite';
+      fav.setAttribute('aria-checked' , "false");
       message = 'This restaurant successfully removed from your favorites';
     }
     DBHelper.showMessage(message);    

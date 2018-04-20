@@ -2,10 +2,11 @@ import DBHelper from './dbhelper';
 
 var restaurant;
 var map;
+let interval;
 /**
  * Initialize Google map, called from HTML.
  */
-window.initMap = () => {
+window.initMap = () => {  
   fetchRestaurantFromURL((error, data) => {
     if (error) { // Got an error!
       console.error(error);
@@ -57,14 +58,17 @@ var fillRestaurantHTML = (data = restaurant) => {
   address.innerHTML = data.address;
 
   const favorite = document.createElement('button');
+  favorite.setAttribute('role' , 'switch');
   let buttonTitle , ariaText, className;  
   if(!data.is_favorite ||data.is_favorite == 'false'){    
     buttonTitle = 'Add Favorite'
     ariaText = `Add ${data.name}'s restaurant to your favorites.`;
+    favorite.setAttribute('aria-checked' , 'false');
     className = 'add-favorite';
   }else{
     buttonTitle = 'Unfavorite';
     ariaText = `Remove ${data.name}'s restaurant from your favorites.`;
+    favorite.setAttribute('aria-checked' , 'true');
     className = 'un-favorite';
   }
   favorite.innerHTML = buttonTitle;
@@ -102,9 +106,11 @@ var handleFavorite = (data , fav) => {
     if(fav.classList.contains('add-favorite')){
       fav.classList.replace('add-favorite' , 'un-favorite');
       fav.innerHTML = 'Unfavorite';
+      fav.setAttribute('aria-checked' , 'true');
       message = 'This restaurant successfully added to your favorites';
     }else{
       fav.classList.replace('un-favorite' , 'add-favorite');
+      fav.setAttribute('aria-checked' , 'false');
       fav.innerHTML = 'Add Favorite';
       message = 'This restaurant successfully removed from your favorites';
     }
@@ -138,20 +144,22 @@ var fillRestaurantHoursHTML = (operatingHours = restaurant.operating_hours) => {
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-var fillReviewsHTML = (reviews = restaurant.reviews) => {  
+var fillReviewsHTML = () => {  
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
+  let ul;
   title.innerHTML = 'Reviews';
   container.appendChild(title);
 
   DBHelper.getReviewsById(getParameterByName('id'))
   .then(reviews => {        
-      if (!reviews) {
+      if (reviews.length == 0) {
         const noReviews = document.createElement('p');
         noReviews.innerHTML = 'No reviews yet. Be the first one!';
         container.appendChild(noReviews);
       }else{
-        const ul = document.getElementById('reviews-list');
+        restaurant.reviews = reviews;        
+        ul = document.getElementById('reviews-list');
         reviews.forEach(review => {
           ul.appendChild(createReviewHTML(review));
         });
@@ -159,7 +167,7 @@ var fillReviewsHTML = (reviews = restaurant.reviews) => {
       }
     
       //add comment section to the bottom
-      createCommentSection(container,restaurant);
+      createCommentSection(container,restaurant , ul);
   })
   .catch(err => {
     console.error(err);
@@ -169,7 +177,7 @@ var fillReviewsHTML = (reviews = restaurant.reviews) => {
 /**
  * Create a comment section bottom of the reviews.
  */
-var createCommentSection = (container,restaurant) => {
+var createCommentSection = (container,restaurant , ul) => {
   const form = document.createElement('form');
   const textArea = document.createElement('textarea');
   const sendButton = document.createElement('button');
@@ -204,13 +212,13 @@ var createCommentSection = (container,restaurant) => {
   div.id = 'spinner';
   div.className = 'spinner';
   container.appendChild(div);
-  setFormListener(div,form,restaurant.id);
+  setFormListener(div,form,restaurant.id, ul);
 }
 
 /**
  * Set a form listener to submit
  */
-var setFormListener = (spinner , form,id) => {
+var setFormListener = (spinner , form , id , ul) => {
   form.addEventListener("submit", function(event) {
     event.preventDefault();
     const name = stripHtmlTags(document.getElementById('name').value);
@@ -235,19 +243,49 @@ var setFormListener = (spinner , form,id) => {
     }
 
     const id = getParameterByName('id');
-    DBHelper.postReview(id , name ,rating, commentText).then(data => {      
-      form.reset();
-      spinner.setAttribute('style' , 'display:block');
-      DBHelper.showMessage('Your review has been succesfully sent.');
-      setTimeout(() => {
-        location.reload();
-      } , 3000);
-    })
-    .catch(err => {
-      DBHelper.showMessage('Your review couldn"t be sent.');
-    });
+    postReview(id , name , rating, commentText, ul ,form);
     
   }, false);
+}
+
+/** 
+ * Post Review
+*/
+function postReview(id , name , rating, commentText , ul,form){
+  DBHelper.postReview(id , name , rating , commentText , restaurant.reviews)
+  .then(data => {     
+    form.reset();      
+    DBHelper.showMessage('Your review has been succesfully sent.');
+    ul.appendChild(createReviewHTML(data));
+  })
+  .catch(err => {    
+    if(navigator.onLine){
+      DBHelper.showMessage("Your review couldn't be sent.");
+    }else{
+      DBHelper.showMessage("Seems like you are offline. We'll post your review when you are connected to the internet." , 6000);
+      DBHelper.storeOfflineReview(id, name , rating,commentText);
+      interval = setInterval(() => {                    
+        checkConnection(id , ul , form);
+      } , 5000);
+    }
+  });
+}
+
+
+/**
+ * Send Review when user goes from offline to online
+ */
+function checkConnection(id,ul , form){
+  if(navigator.onLine){
+    DBHelper.showMessage("You're online now. We'll send your review." , 2000);
+    clearInterval(interval);
+    DBHelper.postStoredReview(id , restaurant.reviews)
+    .then(data => {
+      DBHelper.showMessage('Your review has been succesfully sent.');
+      form.reset();
+      ul.appendChild(createReviewHTML(data));
+    });
+  }
 }
 
 /**

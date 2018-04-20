@@ -99,29 +99,6 @@ flex-wrap: wrap;
 //   width: ((calc(100% - 50px)) / 2);
 // }
 
-#fav-container button {
-  cursor: pointer;
-  font-size: 14px;
-  padding: 6px 12px 10px;
-}
-
-#fav-container .add-favorite,
-#restaurants-list li .add-favorite{
-  background-color: #f1c40f;
-  color: #333;
-}
-
-#fav-container .un-favorite,
-#restaurants-list li .un-favorite{
-  background-color: #ddd;
-  color: #333; 
-}
-
-.favorite{
-  border-top: 5px solid gold;
-  transition: border-top 1.5s ease-in-out;
-}
-
 @media screen and (max-width:1400px){
   /* ====================== Restaurant Listing ====================== */
 

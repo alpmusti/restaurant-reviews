@@ -1,4 +1,4 @@
-var contentCache = 'restaurants-static-v3';
+var contentCache = 'restaurants-static-v4';
 var contentImgsCache = "restaurants-content-imgs";
 
 var allCaches = [
