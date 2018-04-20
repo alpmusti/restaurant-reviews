@@ -15,7 +15,7 @@ I've changed backend server's `localdiskDb.db` because of 10th restaurant missi
 
   "name": "Casa Enrique",
   "neighborhood": "Queens",
-  "photograph": 10,
+  "photograph": "10",
   "address": "5-48 49th Ave, Queens, NY 11101",
   "latlng": {
     "lat": 40.743394,
