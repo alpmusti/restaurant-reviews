@@ -61,16 +61,18 @@ nav {
     height: 80px;
     background-color: #252831;
     text-align:center;
-  }
-  nav h1 {
-    margin: auto;
-  }
-  nav h1 a {
-    color: #fff;
-    font-size: 14pt;
-    font-weight: 200;
-    letter-spacing: 10px;
-    text-transform: uppercase;
+    
+    h1{
+      margin: auto;
+
+      a{
+        color: #fff;
+        font-size: 14pt;
+        font-weight: 200;
+        letter-spacing: 10px;
+        text-transform: uppercase;
+      }
+    }
   }
   #footer {
     background-color: #3D3D3D;

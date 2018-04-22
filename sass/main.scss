@@ -104,10 +104,10 @@ flex-wrap: wrap;
 
   #restaurants-list {
     width: 100%;
-  }
 
-  #restaurants-list li {
-    width: calc((100% - 15px) / 4) 
+    li{
+      width: calc((100% - 15px) / 4);
+    }
   }
 }
 
@@ -116,10 +116,10 @@ flex-wrap: wrap;
   /* ====================== Restaurant Details ====================== */
   #restaurants-list {
     width: 100%;
-  }
 
-  #restaurants-list li {
-    width: 40%;
+    li {
+      width: 40%;
+    }
   }
 }
 
@@ -128,11 +128,9 @@ flex-wrap: wrap;
 
   #restaurants-list {
     width: 100%;
-  }
 
-  /* ====================== Restaurant Listing ====================== */
-  
-  #restaurants-list li {
-    width:75%;
+    li{
+      width:75%;
+    }
   }
 }

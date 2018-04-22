@@ -275,7 +275,7 @@ function postReview(id , name , rating, commentText , ul,form){
 /**
  * Send Review when user goes from offline to online
  */
-function checkConnection(id,ul , form){
+function checkConnection(id, ul , form){
   if(navigator.onLine){
     DBHelper.showMessage("You're online now. We'll send your review." , 2000);
     clearInterval(interval);
