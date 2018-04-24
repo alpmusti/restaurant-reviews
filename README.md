@@ -1,5 +1,10 @@
 ## Restaurant Reviews App
-This is the restaurant reviews application which is working offline too.
+This is my first Progressive Web Application named restaurant reviews application which is working offline too. This project met the requirements below from [Lighthouse](https://developers.google.com/web/tools/lighthouse/)
+
+* Performance > 90
+* Accessilibility > 90
+* Progessive > 90
+
 ### Usage
 1. In order to use this project go to [here](https://github.com/udacity/mws-restaurant-stage-3) and clone the backend server and run it.
 2. Install dependencies by running `npm install --save` command.
