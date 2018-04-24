@@ -1,5 +1,5 @@
 ## Restaurant Reviews App
-This is my first Progressive Web Application named restaurant reviews application which is working offline too. This project met the requirements below from [Lighthouse](https://developers.google.com/web/tools/lighthouse/)
+This is my first Progressive Web Application which is working **offline** too. This project met the requirements below from [Lighthouse](https://developers.google.com/web/tools/lighthouse/)
 
 * Performance > 90
 * Accessilibility > 90
